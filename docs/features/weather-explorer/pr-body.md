@@ -65,6 +65,8 @@ No git history in this workspace yet. Tasks T1–T18 are all `done` per `docs/fe
 
 Review gate: PASS — `docs/features/weather-explorer/_review/review-2026-07-04-pass6.md`
 
+Repository: https://github.com/arabuga/sdd-weather-explorer
+
 ## Operational notes
 
 - Migration: none
