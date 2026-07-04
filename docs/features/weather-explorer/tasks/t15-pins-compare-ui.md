@@ -18,10 +18,13 @@ Derives from [Flow 2](../sad.md), [Compare guardrails flow](../sad.md), and US-0
 
 ## What
 
-- `components/weather/pins/` — chip list above forecast; max three pins; block fourth with inline message (AC-10).
-- `components/weather/compare/` — weekend compare panel calling `POST /api/v1/forecast/weekend-compare`.
+- `components/weather/pins/` — chip list in **search column below geolocation**; max three pins; block fourth with inline message (AC-10).
+- `components/weather/compare/` — weekend compare panel **below map** in map column; calls `POST /api/v1/forecast/weekend-compare`.
+- Compare trigger button in pin chips block (disabled when <2 pins).
 - Side-by-side Sat/Sun table with temp, precip, comfort; sticky city headers with promote-to-active control (AC-09).
 - Disable compare when fewer than two pins (AC-09b); clear pins on refresh (AC-10b).
+
+See [ui.md](../ui.md) for placement diagram.
 
 ## Definition of Done
 

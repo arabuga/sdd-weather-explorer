@@ -9,6 +9,8 @@ target_surfaces: [web-frontend, backend-service]
 
 # Software Architecture Document — weather-explorer
 
+> **UI design:** [ui.md](./ui.md) — panel placement and component anatomy (canonical for layout questions).
+
 <!-- C4 Context (L1) in §3. C4 Container (L2) in §5. §10 numbers verbatim from spec §6 NFR. -->
 
 ## 1. Introduction and goals
@@ -29,14 +31,14 @@ target_surfaces: [web-frontend, backend-service]
 | Tech Lead | SAD approval, workshop delivery | Yes |
 
 **Decision overrides (¶4):**
-- Decision override: responsive layout composition resolved — search hero centred on empty state; at `<768px` single column (search → weekend highlight → day cards → hourly chart → map); at `768–1279px` two columns (left: search, pins, forecast; right: map); at `≥1280px` three columns (left: search + pins; centre: forecast + chart; right: map + compare table when active). — rationale: closes spec §8 layout open question while preserving AC-16 breakpoint counts.
+- Decision override: responsive layout composition resolved — search hero centred on empty state; at `<768px` single column (search block → forecast block → map column with compare below map when open); at `768–1279px` two columns (left: search block with geolocation under search and pins below geolocation, forecast + chart; right: map + compare); at `≥1280px` three columns (left: search block; centre: forecast + chart; right: map + compare when active). Full panel anatomy in [ui.md](./ui.md). — rationale: closes spec §8 layout open question while preserving AC-16 breakpoint counts.
 
 ## 2. Constraints
 
 **Technical.**
 - TypeScript (strict mode), React 19.2, Next.js 16.2 App Router — workshop stack baseline.
 - Tailwind CSS 4 (PostCSS plugin), shadcn/ui base-nova, class-variance-authority.
-- Open-Meteo forecast + geocoding APIs only for weather data; Leaflet + react-leaflet with OpenStreetMap raster tiles only.
+- Open-Meteo forecast + forward geocoding APIs for weather data; **Nominatim** (OpenStreetMap) for reverse geocode by coordinates (map click and opt-in geolocation); Leaflet + react-leaflet with OpenStreetMap raster tiles only.
 - Vitest for unit tests on framework-free `lib/` code; no Playwright in MVP — browser verification via chrome-devtools MCP recordings.
 - Vercel hosting with preview URL per pull request.
 - No application database in MVP — stateless deployable; visitor state lives in URL query parameters and in-memory client state only.

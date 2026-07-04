@@ -59,7 +59,7 @@ export async function fetchForecastRaw(
     ].join(","),
   );
   url.searchParams.set("hourly", "temperature_2m");
-  url.searchParams.set("forecast_hours", "48");
+  // Default forecast_days hourly series starts at local 00:00 today (not current hour).
 
   let response: Response;
   try {
@@ -91,10 +91,14 @@ export async function fetchForecastRaw(
 
   const hourlyTimes = data.hourly?.time ?? [];
   const hourlyTemps = data.hourly?.temperature_2m ?? [];
-  const hourly: HourlyWeatherRaw[] = hourlyTimes.slice(0, 48).map((time, i) => ({
-    time,
-    temperature_c: hourlyTemps[i] ?? 0,
-  }));
+  const hourlyStart = hourlyTimes.findIndex((time) => time.endsWith("T00:00"));
+  const fromMidnight = hourlyStart >= 0 ? hourlyStart : 0;
+  const hourly: HourlyWeatherRaw[] = hourlyTimes
+    .slice(fromMidnight, fromMidnight + 48)
+    .map((time, i) => ({
+      time,
+      temperature_c: hourlyTemps[fromMidnight + i] ?? 0,
+    }));
 
   const astronomy: AstronomyRaw = {
     sunrise: daily.sunrise?.[0] ?? "",

@@ -62,7 +62,8 @@ describe("ForecastPanel", () => {
     expect(screen.getAllByLabelText("Ясно")).toHaveLength(7);
     expect(screen.getAllByText("25° / 15°C")).toHaveLength(7);
     expect(screen.getAllByText(/10% · 3\.0 m\/s/)).toHaveLength(7);
-    expect(screen.getAllByText("70 — Комфортно.")).toHaveLength(7);
+    expect(screen.getAllByText("70")).toHaveLength(7);
+    expect(screen.getAllByText("Комфортно.")).toHaveLength(7);
   });
 
   it("renders weather icon on each day card (AC-04)", () => {

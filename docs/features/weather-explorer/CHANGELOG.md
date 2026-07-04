@@ -1,5 +1,13 @@
 # Changelog — weather-explorer
 
+## Unreleased — UI design documentation sync (2026-07-04)
+
+**Docs:** Added canonical [ui.md](./ui.md) capturing shipped panel placement, comfort badge layouts, hourly chart (48h from 00:00, 6-hour axis ticks, astronomy chip row), geolocation under search, pins/compare in search column and map column respectively, and Nominatim reverse geocode.
+
+**Spec / AC updates:** AC-04 hourly anchor changed from current local hour to local midnight; AC-09 pin and compare placement aligned with implementation.
+
+**Related code (already shipped):** `components/weather/forecast/forecast-panel.tsx`, `components/weather/chart/hourly-chart.tsx`, `components/weather/weather-app.tsx`, `lib/weather/forecast.ts`, `lib/weather/geocode.ts`.
+
 ## weather-explorer — Ukrainian-first weekend weather planner (MVP)
 
 **What:** A single calm screen where anonymous visitors search or map-pick a city, read a seven-day forecast with comfort scores and a highlighted upcoming-weekend verdict, pin up to three cities for side-by-side weekend comparison, and share the active location via URL — all without accounts, cookies, or paid API keys.

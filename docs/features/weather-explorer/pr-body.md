@@ -20,6 +20,7 @@ Spec: [docs/features/weather-explorer/spec.md](docs/features/weather-explorer/sp
 ## Design
 
 - Spec: `docs/features/weather-explorer/spec.md`
+- **UI design:** `docs/features/weather-explorer/ui.md` — layout, comfort badge anatomy, hourly chart, pin/compare placement
 - Architecture: `docs/features/weather-explorer/sad.md`
 - Decisions: `docs/features/weather-explorer/adr/`
 - Data model + migration: none

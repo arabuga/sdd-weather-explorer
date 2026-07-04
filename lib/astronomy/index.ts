@@ -84,3 +84,31 @@ export function themeIndicator(
 ): ThemeIndicator {
   return isLocationNight(now, sunrise, sunset, timezone) ? "night" : "day";
 }
+
+/** Index into hourly series for a local astronomy event, or null if outside the window. */
+export function hourlyIndexForLocalEvent(
+  hourlyTimes: string[],
+  eventIso: string,
+): number | null {
+  if (!hourlyTimes.length || !eventIso) return null;
+  const normalized = eventIso.includes("T")
+    ? eventIso
+    : `${hourlyTimes[0].slice(0, 10)}T${eventIso}`;
+  const idx = hourlyTimes.findIndex((time) => time >= normalized);
+  return idx === -1 ? null : idx;
+}
+
+/** Ukrainian daylight duration label from sunrise/sunset local ISO times. */
+export function formatDaylightDurationUk(
+  sunrise: string,
+  sunset: string,
+): string | null {
+  const start = parseLocalTimeMinutes(sunrise);
+  const end = parseLocalTimeMinutes(sunset);
+  if (start == null || end == null || end <= start) return null;
+  const total = end - start;
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
+  if (minutes === 0) return `${hours} год`;
+  return `${hours} год ${minutes} хв`;
+}

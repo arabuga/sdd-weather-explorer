@@ -20,6 +20,12 @@ export const uk = {
     providerUnavailable: "Прогноз тимчасово недоступний. Спробуйте ще раз.",
     sunrise: "Схід",
     sunset: "Захід",
+    hourlyTitle: "Температура на 48 годин",
+    sunriseCaption: "Схід сонця",
+    sunsetCaption: "Захід сонця",
+    sunriseHint: "Світанок",
+    sunsetHint: "Сутінки",
+    daylightLabel: "Світловий день",
   },
   map: {
     loading: "Завантаження карти",

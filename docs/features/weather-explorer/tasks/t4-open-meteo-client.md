@@ -18,8 +18,8 @@ Derives from [ADR-0002](../adr/0002-proxy-open-meteo-through-server-bff.md) and 
 
 ## What
 
-- `lib/weather/geocode.ts` — forward geocode suggestions and reverse geocode by coordinates.
-- `lib/weather/forecast.ts` — daily + hourly + astronomy fields needed by OpenAPI `ForecastBundle`.
+- `lib/weather/geocode.ts` — forward geocode via Open-Meteo; **reverse geocode via Nominatim** (OpenStreetMap) with required User-Agent.
+- `lib/weather/forecast.ts` — daily + hourly (48 points from local midnight) + astronomy fields needed by OpenAPI `ForecastBundle`.
 - `lib/weather/types.ts` — internal DTOs mapped from Open-Meteo JSON.
 - Vitest with mocked `fetch` for success, empty, and HTTP error paths.
 - Mark module server-only (document in file header; no client imports).

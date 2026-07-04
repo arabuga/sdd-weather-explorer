@@ -13,6 +13,61 @@ const comfortColors = {
   red: "bg-red-500/20 text-red-700 dark:text-red-300",
 };
 
+type ComfortColor = keyof typeof comfortColors;
+
+function ComfortBadge({
+  value,
+  rationale,
+  color,
+  compact = false,
+  layout = "stack",
+}: {
+  value: number;
+  rationale: string;
+  color: ComfortColor;
+  compact?: boolean;
+  layout?: "stack" | "inline";
+}) {
+  const scoreClass = compact ? "size-9 text-xs" : "size-10 text-sm";
+  const score = (
+    <span
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-semibold tabular-nums ${scoreClass} ${comfortColors[color]}`}
+      aria-hidden={layout === "inline"}
+    >
+      {value}
+    </span>
+  );
+  const text = (
+    <p
+      className={`leading-snug ${compact ? "text-center text-[11px] text-balance" : "text-sm"} ${layout === "inline" ? "" : "text-center text-balance"}`}
+    >
+      {rationale}
+    </p>
+  );
+
+  if (layout === "inline") {
+    return (
+      <div
+        className="flex items-center gap-3"
+        aria-label={`${value}: ${rationale}`}
+      >
+        {score}
+        {text}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`flex flex-col items-center ${compact ? "gap-1 pt-1" : "gap-2"}`}
+      aria-label={`${value}: ${rationale}`}
+    >
+      {score}
+      {text}
+    </div>
+  );
+}
+
 function weekdayUk(en: string): string {
   return uk.weekdays[en as keyof typeof uk.weekdays] ?? en;
 }
@@ -50,20 +105,24 @@ export function ForecastPanel() {
           <CardTitle>{t("forecast.weekendHighlight")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3">
-            <span
-              className={`rounded-full px-3 py-1 text-sm font-semibold ${comfortColors[forecast.weekend_highlight.score >= 70 ? "green" : forecast.weekend_highlight.score >= 40 ? "yellow" : "red"]}`}
-            >
-              {forecast.weekend_highlight.score}
-            </span>
-            <p className="text-sm">{forecast.weekend_highlight.rationale}</p>
-          </div>
+          <ComfortBadge
+            value={forecast.weekend_highlight.score}
+            rationale={forecast.weekend_highlight.rationale}
+            color={
+              forecast.weekend_highlight.score >= 70
+                ? "green"
+                : forecast.weekend_highlight.score >= 40
+                  ? "yellow"
+                  : "red"
+            }
+            layout="inline"
+          />
         </CardContent>
       </Card>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3 2xl:grid-cols-4">
         {forecast.days.map((day) => (
-          <Card key={day.date} className="min-h-[140px]">
+          <Card key={day.date} className="min-h-[160px]">
             <CardHeader className="pb-1">
               <CardTitle className="flex items-center justify-between gap-2">
                 <span>{weekdayUk(day.weekday)}</span>
@@ -83,11 +142,12 @@ export function ForecastPanel() {
               <p className="text-muted-foreground">
                 {day.precipitation_probability_percent}% · {day.wind_speed_ms.toFixed(1)} m/s
               </p>
-              <div
-                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${comfortColors[day.comfort.color]}`}
-              >
-                {day.comfort.value} — {day.comfort.rationale}
-              </div>
+              <ComfortBadge
+                value={day.comfort.value}
+                rationale={day.comfort.rationale}
+                color={day.comfort.color}
+                compact
+              />
             </CardContent>
           </Card>
         ))}
@@ -102,7 +162,7 @@ export function ForecastSkeleton() {
       <Skeleton className="h-20 w-full" />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3">
         {Array.from({ length: FORECAST_DAY_CARD_COUNT }).map((_, i) => (
-          <Skeleton key={i} className="h-[140px] w-full" />
+          <Skeleton key={i} className="h-[160px] w-full" />
         ))}
       </div>
     </div>

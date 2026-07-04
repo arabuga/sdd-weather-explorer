@@ -18,10 +18,11 @@ Derives from [Flow: Opt-in geolocation](../sad.md) and US-06 ACs.
 
 ## What
 
-- `components/weather/geolocation/` — «Use my location» control near search.
+- `components/weather/geolocation/` — «Моє місцезнаходження» control **directly under city search** in the search column ([ui.md](../ui.md)).
 - No `navigator.geolocation` call on first load (AC-11).
-- On success: reverse geocode via BFF and set active location.
+- On success: reverse geocode via BFF (Nominatim) and set active location.
 - On denial/unavailability: calm inline guidance, prior location unchanged, no toast (AC-11b).
+- On reverse-geocode failure: inline message + retry button reusing last coordinates.
 
 ## Definition of Done
 

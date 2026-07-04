@@ -64,7 +64,7 @@ C4Container
 - **Migrations:** N/A — no relational datastore in foundation
 - **Tests:** Vitest unit tests for `lib/`; no Playwright in MVP — `docs/features/weather-explorer/sad.md` §2
 - **Inter-module communication:** Direct function calls inside monolith; server fetches for external APIs — `docs/features/weather-explorer/sad.md` §5
-- **UI / styling:** Tailwind 4 + shadcn/ui; Ukrainian-first copy from `lib/i18n/uk.ts` — `docs/features/weather-explorer/adr/0006-*`
+- **UI / styling:** Tailwind 4 + shadcn/ui; Ukrainian-first copy from `lib/i18n/uk.ts`; panel placement and component anatomy in `docs/features/weather-explorer/ui.md` — ADR `docs/features/weather-explorer/adr/0006-*`
 
 ## Datastores
 

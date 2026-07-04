@@ -22,11 +22,19 @@ describe("HourlyChart", () => {
 
     render(<HourlyChart />);
     expect(
-      screen.getByRole("img", { name: "Графік температури на 48 годин" }),
+      screen.getByRole("img", { name: "Температура на 48 годин" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Схід:/)).toBeInTheDocument();
-    expect(screen.getByText(/05:30/)).toBeInTheDocument();
-    expect(screen.getByText(/Захід:/)).toBeInTheDocument();
-    expect(screen.getByText(/21:15/)).toBeInTheDocument();
+    expect(screen.getByText("Схід сонця")).toBeInTheDocument();
+    expect(screen.getByText("05:30")).toBeInTheDocument();
+    expect(screen.getByText("Світанок")).toBeInTheDocument();
+    expect(screen.getByText("Захід сонця")).toBeInTheDocument();
+    expect(screen.getByText("21:15")).toBeInTheDocument();
+    expect(screen.getByText("Сутінки")).toBeInTheDocument();
+    expect(screen.getByText("Світловий день")).toBeInTheDocument();
+    expect(screen.getByText("15 год 45 хв")).toBeInTheDocument();
+    expect(screen.getAllByText("00:00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("06:00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("12:00").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("23:00")).toBeInTheDocument();
   });
 });

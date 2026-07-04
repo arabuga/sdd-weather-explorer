@@ -18,14 +18,15 @@ Completes the hourly portion of [AC-04](../spec.md) below the day-card grid.
 
 ## What
 
-- `components/weather/chart/` — client component rendering 48 hours from active location's current local hour.
-- Uses hourly series from forecast payload (same fetch as T11 or shared hook).
-- Shows today's sunrise and sunset under the chart from astronomy fields.
+- `components/weather/chart/` — client component rendering 48 hours from **local midnight (00:00)** in the active location timezone.
+- Uses hourly series from forecast payload (same fetch as T11 or shared hook); BFF slices 48 points from first `T00:00` in `lib/weather/forecast.ts`.
+- SVG area chart with gradient fill, min/max labels, x-axis hour ticks every 6 hours (see [ui.md](../ui.md)).
+- Astronomy row below chart: sunrise chip, daylight duration, sunset chip — **no** markers overlaid on the chart line.
 
 ## Definition of Done
 
-- [ ] Chart spans 48 hourly points anchored to location local time.
-- [ ] Sunrise/sunset labels visible beneath chart when astronomy data present.
+- [ ] Chart spans 48 hourly points anchored to local 00:00 (not current clock hour).
+- [ ] X-axis shows hour labels (6-hour step + final hour); astronomy chip row visible beneath chart.
 - [ ] Renders calm empty state when hourly data missing (no console errors).
 - [ ] lint + tsc clean.
 

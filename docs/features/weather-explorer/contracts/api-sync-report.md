@@ -24,8 +24,8 @@ Inputs: `spec.md`, `sad.md` §6, `CONTEXT.md`, `architecture-map.md`
 | WeekendHighlight.score | CONTEXT «weekend highlight» mean Sat+Sun | high |
 | WeekendHighlight.saturday_date/sunday_date | AC-05 timezone rule | high |
 | ForecastBundle.days | AC-04 seven day cards | high |
-| ForecastBundle.hourly | AC-04 forty-eight hour chart | high |
-| ForecastBundle.astronomy | AC-04 sunrise/sunset | high |
+| ForecastBundle.hourly | AC-04 forty-eight hour chart from local 00:00 (48 points) | high |
+| ForecastBundle.astronomy | AC-04 sunrise/sunset + daylight row in UI | high |
 | ForecastBundle.timezone | AC-05, AC-13 location TZ | high |
 | GeocodeSuggestionList.empty | AC-02 zero-match inline state | medium |
 | WeekendCompareRequest.locations | AC-09 pins 2–3 cities | high |

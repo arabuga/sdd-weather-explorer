@@ -65,13 +65,45 @@ describe("searchGeocode", () => {
 });
 
 describe("reverseGeocode", () => {
-  it("returns place or null", async () => {
+  it("maps Nominatim reverse payload to a place", async () => {
     const fetchFn = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => searchPayload,
+      json: async () => ({
+        address: {
+          city: "Київ",
+          borough: "Шевченківський район",
+          country: "Україна",
+          country_code: "ua",
+        },
+      }),
     });
-    const place = await reverseGeocode({ latitude: 50.45, longitude: 30.52, fetchFn });
-    expect(place?.name).toBe("Kyiv");
+    const place = await reverseGeocode({
+      latitude: 50.45,
+      longitude: 30.52,
+      fetchFn,
+    });
+    expect(fetchFn).toHaveBeenCalledWith(
+      expect.stringContaining("nominatim.openstreetmap.org/reverse"),
+      expect.objectContaining({
+        headers: { "User-Agent": expect.any(String) },
+      }),
+    );
+    expect(place?.name).toBe("Київ");
+    expect(place?.country).toBe("Україна");
+    expect(place?.flag_emoji).toBe("🇺🇦");
+  });
+
+  it("returns null when Nominatim yields no usable name", async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ address: {} }),
+    });
+    const place = await reverseGeocode({
+      latitude: 0,
+      longitude: 0,
+      fetchFn,
+    });
+    expect(place).toBeNull();
   });
 });
 
@@ -88,7 +120,31 @@ describe("fetchForecastRaw", () => {
     });
     expect(raw.daily).toHaveLength(7);
     expect(raw.hourly.length).toBeLessThanOrEqual(48);
+    expect(raw.hourly[0]?.time).toBe("2026-07-04T00:00");
     expect(raw.astronomy.sunrise).toBeTruthy();
+  });
+
+  it("slices hourly from local midnight even when API starts mid-day", async () => {
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ...forecastPayload,
+        hourly: {
+          time: [
+            ...Array.from({ length: 5 }, (_, i) => `2026-07-04T${String(12 + i).padStart(2, "0")}:00`),
+            ...Array.from({ length: 48 }, (_, i) => `2026-07-05T${String(i % 24).padStart(2, "0")}:00`),
+          ],
+          temperature_2m: Array.from({ length: 53 }, (_, i) => 10 + i),
+        },
+      }),
+    });
+    const raw = await fetchForecastRaw({
+      latitude: 50.45,
+      longitude: 30.52,
+      fetchFn,
+    });
+    expect(raw.hourly[0]?.time).toBe("2026-07-05T00:00");
+    expect(raw.hourly).toHaveLength(48);
   });
 
   it("throws on network failure", async () => {

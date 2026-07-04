@@ -19,7 +19,7 @@ Final integration of all panels per [sad §1 layout override](../sad.md) and ano
 ## What
 
 - Replace scaffold placeholder `app/page.tsx` with composed weather-explorer main view.
-- Place search + pins (left), forecast + chart (centre), map + compare when active (right) at `≥1280px`; tablet/mobile stacks per SAD §1.
+- Place search block (search + geolocation + pins), forecast + chart, map + compare per [ui.md](../ui.md) and SAD §1.
 - Wire all feature components from T10–T17 through shell slots from T9.
 - Smoke-verify every MVP flow reachable without authentication.
 

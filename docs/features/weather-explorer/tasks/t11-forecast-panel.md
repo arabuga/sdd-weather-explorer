@@ -19,8 +19,8 @@ Derives from [AC-04](../spec.md) family and [Flow 1](../sad.md) — core decisio
 ## What
 
 - `components/weather/forecast/` — fetches `GET /api/v1/forecast` when active location set.
-- Seven day cards: weekday, high/low °C, icon, precip %, wind, comfort badge (score + rationale + color).
-- Weekend highlight headline = mean Sat–Sun comfort at top of grid.
+- Seven day cards: weekday, high/low °C, icon, precip %, wind, comfort badge (stacked: circle score + rationale below — see [ui.md](../ui.md)).
+- Weekend highlight headline = mean Sat–Sun comfort at top of grid; **inline** badge layout (score left, rationale right).
 - Skeleton grid matching loaded footprint while loading (AC-04c).
 - In-memory cache keyed by location; discard on location change (AC-04b).
 

@@ -9,6 +9,7 @@ feature_size: "M"
 # Spec — weather-explorer
 
 > **Glossary:** [CONTEXT](./CONTEXT.md)
+> **UI design:** [ui.md](./ui.md)
 > **Reference module / docs / channels used:** Product brief (session input); PRD traceability IDs (`FR-*`, `BC-*`, `NFR-*`) from workshop requirements; competitive research (WeatherItinerary, WeatherLens, METEOPROG, NoAdsWeather); devil's-advocate risk pass.
 
 ## 1. Context
@@ -109,7 +110,7 @@ Traceability: PRD IDs in §5 AC tags anchor downstream tests. Decision override:
 
 **Given** an anonymous visitor has an active location
 **When** forecast data loads successfully
-**Then** the system shows seven day cards with weekday, high and low temperature in degrees Celsius, weather icon, precipitation probability, wind, a colored comfort badge showing the numeric score from zero to one hundred plus a short Ukrainian rationale sentence, and a weekend highlight at the top of the grid presenting one combined headline verdict equal to the mean comfort score of the upcoming Saturday and Sunday; below the cards it shows an hourly temperature chart covering the forty-eight hours starting from the active location's current local hour, with today's sunrise and sunset noted underneath
+**Then** the system shows seven day cards with weekday, high and low temperature in degrees Celsius, weather icon, precipitation probability, wind, a colored comfort badge showing the numeric score from zero to one hundred in a circle with a short Ukrainian rationale sentence below it, and a weekend highlight at the top of the grid presenting one combined headline verdict equal to the mean comfort score of the upcoming Saturday and Sunday with the score and rationale in a horizontal row; below the cards it shows an hourly temperature chart covering forty-eight hours starting from local midnight (00:00) in the active location's timezone, with hour labels on the chart axis and today's sunrise, sunset, and daylight duration shown in a row beneath the chart (see [ui.md](./ui.md))
 
 ### AC-04b (US-02) — cross-context
 
@@ -161,9 +162,9 @@ Traceability: PRD IDs in §5 AC tags anchor downstream tests. Decision override:
 
 ### AC-09 (US-05) — happy path
 
-**Given** an anonymous visitor has pinned two or three cities shown as chips above the forecast
-**When** they activate the weekend compare control
-**Then** the system shows a side-by-side table for Saturday and Sunday with high and low temperature, precipitation probability, and comfort score per pinned city; each column has a sticky header with the city name and a control to make that city active
+**Given** an anonymous visitor has pinned two or three cities shown as chips in the search column below the geolocation control
+**When** they activate the weekend compare button in the pin chips block
+**Then** the system shows a side-by-side table in the map column below the map for Saturday and Sunday with high and low temperature, precipitation probability, and comfort score per pinned city; each column has a sticky header with the city name and a control to make that city active
 
 ### AC-09b (US-05) — domain invariant
 
@@ -276,4 +277,4 @@ Traceability: PRD IDs in §5 AC tags anchor downstream tests. Decision override:
 - [x] Which local calendar rule defines «upcoming weekend» when today is Saturday or Sunday? **Resolved:** current in-progress Sat–Sun pair when today is Sat or Sun; otherwise next upcoming Sat–Sun in active location timezone — see AC-05 and CONTEXT «weekend highlight». — owner: Tech Lead, due: clarify 2026-07-04
 - [ ] How should comfort rationale communicate forecast uncertainty beyond naming dominant factors? Default now: factual Ukrainian sentence capped at 80 characters per AC-18. — owner: Product, due: before sdd:implement
 - [ ] What minimal hosting edge rate limit balances abuse protection with the no-fingerprinting promise? Default now: generous anonymous limits with calm degradation message. — owner: Tech Lead, due: before sdd:tasks
-- [x] Which panels occupy each responsive column at 768 px and 1280 px breakpoints? **Resolved in SAD §1 override:** mobile stack search → forecast → map; tablet two-column (left: search, pins, forecast; right: map); desktop three-column (left: search + pins; centre: forecast + chart; right: map + compare when active). — owner: Tech Lead, due: design 2026-07-04
+- [x] Which panels occupy each responsive column at 768 px and 1280 px breakpoints? **Resolved in SAD §1 override and [ui.md](./ui.md):** mobile stack search block → forecast → map; tablet two-column (left: search + geolocation + pins + forecast; right: map + compare); desktop three-column (left: search block; centre: forecast + chart; right: map + compare when active). — owner: Tech Lead, due: design 2026-07-04
