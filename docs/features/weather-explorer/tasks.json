@@ -1,0 +1,168 @@
+{
+  "slug": "weather-explorer",
+  "feature_size": "M",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Add Ukrainian-first i18n catalogues and deterministic footer jokes",
+      "layer": "domain",
+      "deps": [],
+      "acs": ["AC-17"],
+      "dod": "Vitest covers uk/en lookup fallback and joke rotation; no runtime i18n library imported",
+      "files_hint": ["lib/i18n/", "lib/jokes/"]
+    },
+    {
+      "id": "T2",
+      "title": "Implement comfort scoring and weekend highlight in framework-free lib",
+      "layer": "domain",
+      "deps": [],
+      "acs": ["AC-04", "AC-05", "AC-18"],
+      "dod": "Vitest proves score 0–100, badge colors at 70/40 thresholds, rationale ≤80 chars without emoji or !, and Sat–Sun pair uses location timezone including in-progress weekend",
+      "files_hint": ["lib/scoring/"]
+    },
+    {
+      "id": "T3",
+      "title": "Encode and decode active location in URL query state",
+      "layer": "domain",
+      "deps": [],
+      "acs": ["AC-08"],
+      "dod": "Vitest round-trips lat/lon/name through encode/decode; pins and compare flags are excluded from shareable query",
+      "files_hint": ["lib/url-state/"]
+    },
+    {
+      "id": "T4",
+      "title": "Build server-only Open-Meteo geocode and forecast client wrappers",
+      "layer": "infra",
+      "deps": [],
+      "acs": [],
+      "dod": "Vitest with mocked fetch maps Open-Meteo payloads to internal DTOs; module has no next/react imports",
+      "files_hint": ["lib/weather/"]
+    },
+    {
+      "id": "T5",
+      "title": "Expose geocode suggestions and reverse-geocode BFF routes with shared errors",
+      "layer": "ports",
+      "deps": ["T4"],
+      "acs": ["AC-01", "AC-02", "AC-02b", "AC-03", "AC-06", "AC-06b"],
+      "dod": "Route handlers match openapi.yaml; contract tests or handler tests cover 200 empty list, 503 provider_unavailable, and 422 reverse_failed; lib/errors codes align with OpenAPI",
+      "files_hint": ["app/api/v1/geocode/", "lib/errors/"]
+    },
+    {
+      "id": "T6",
+      "title": "Expose forecast BFF route with comfort scores and weekend highlight",
+      "layer": "ports",
+      "deps": ["T2", "T4"],
+      "acs": ["AC-04", "AC-05", "AC-18"],
+      "dod": "GET /api/v1/forecast returns ForecastBundle per OpenAPI; handler tests cover happy path and 503 provider_unavailable",
+      "files_hint": ["app/api/v1/forecast/route.ts"]
+    },
+    {
+      "id": "T7",
+      "title": "Expose weekend-compare BFF route for two or three pinned cities",
+      "layer": "ports",
+      "deps": ["T2", "T4"],
+      "acs": ["AC-09"],
+      "dod": "POST /api/v1/forecast/weekend-compare returns side-by-side Sat/Sun metrics; handler test covers 2–3 locations and 400 on fewer than two",
+      "files_hint": ["app/api/v1/forecast/weekend-compare/route.ts"]
+    },
+    {
+      "id": "T8",
+      "title": "Add shadcn Input, Card, and Skeleton primitives",
+      "layer": "ui",
+      "deps": [],
+      "acs": ["AC-04c", "AC-14"],
+      "dod": "components/ui/input.tsx, card.tsx, skeleton.tsx import cleanly; Skeleton matches forecast card footprint used in loading states",
+      "files_hint": ["components/ui/input.tsx", "components/ui/card.tsx", "components/ui/skeleton.tsx"]
+    },
+    {
+      "id": "T9",
+      "title": "Build responsive app shell, hero empty state, and footer credits",
+      "layer": "ui",
+      "deps": ["T1", "T8"],
+      "acs": ["AC-12", "AC-16", "AC-17"],
+      "dod": "Layout shows centred search hero with no default city; columns adapt at 768px and 1280px; footer links Open-Meteo and OSM and shows deterministic Ukrainian jokes",
+      "files_hint": ["app/layout.tsx", "components/weather/shell/", "components/weather/footer/"]
+    },
+    {
+      "id": "T10",
+      "title": "Implement debounced city search combobox with calm error states",
+      "layer": "ui",
+      "deps": ["T5", "T9"],
+      "acs": ["AC-01", "AC-02", "AC-02b", "AC-03"],
+      "dod": "Debounced suggestions call BFF; zero-match shows inline Nothing found; provider outage shows distinct retry state; Enter selects lone suggestion",
+      "files_hint": ["components/weather/search/"]
+    },
+    {
+      "id": "T11",
+      "title": "Render forecast day cards, weekend highlight, and loading skeleton",
+      "layer": "ui",
+      "deps": ["T6", "T9", "T8"],
+      "acs": ["AC-04", "AC-04b", "AC-04c", "AC-05", "AC-18"],
+      "dod": "Seven day cards show required fields and comfort badge; weekend headline uses mean Sat–Sun score; skeleton preserves layout while loading; location change clears in-memory cache",
+      "files_hint": ["components/weather/forecast/"]
+    },
+    {
+      "id": "T12",
+      "title": "Add forty-eight-hour hourly temperature chart with sunrise and sunset",
+      "layer": "ui",
+      "deps": ["T6", "T11"],
+      "acs": ["AC-04"],
+      "dod": "Chart covers 48 hours from active location local hour; today's sunrise and sunset shown below per forecast payload",
+      "files_hint": ["components/weather/chart/"]
+    },
+    {
+      "id": "T13",
+      "title": "Load Leaflet map client-only with OSM tiles and reverse-geocode click",
+      "layer": "ui",
+      "deps": ["T5", "T9"],
+      "acs": ["AC-06", "AC-06b", "AC-07"],
+      "dod": "Dynamic import with SSR skeleton; OSM attribution always visible; successful click sets location and marker; failure keeps prior location with inline retry",
+      "files_hint": ["components/weather/map/"]
+    },
+    {
+      "id": "T14",
+      "title": "Wire URL query state and in-memory forecast cache to search and forecast",
+      "layer": "wiring",
+      "deps": ["T3", "T10", "T11"],
+      "acs": ["AC-08", "AC-04b"],
+      "dod": "Copied URL restores active location and forecast in fresh session; changing location discards prior forecast cache; pins not encoded in share link",
+      "files_hint": ["components/weather/state/", "app/page.tsx"]
+    },
+    {
+      "id": "T15",
+      "title": "Implement pin chips and weekend compare table with guardrails",
+      "layer": "ui",
+      "deps": ["T7", "T11", "T8"],
+      "acs": ["AC-09", "AC-09b", "AC-10", "AC-10b"],
+      "dod": "Up to three pin chips; compare disabled below two pins; fourth pin blocked with message; refresh clears pins; compare table shows Sat/Sun metrics and promote-to-active control",
+      "files_hint": ["components/weather/compare/", "components/weather/pins/"]
+    },
+    {
+      "id": "T16",
+      "title": "Add explicit opt-in geolocation control with permission-denied guidance",
+      "layer": "ui",
+      "deps": ["T5", "T10"],
+      "acs": ["AC-11", "AC-11b", "AC-12"],
+      "dod": "No geolocation on first load; button triggers browser API then reverse-geocode flow; denial shows calm inline guidance without toast",
+      "files_hint": ["components/weather/geolocation/"]
+    },
+    {
+      "id": "T17",
+      "title": "Render condition-driven background, local clock, and reduced-motion fallback",
+      "layer": "ui",
+      "deps": ["T11", "T9"],
+      "acs": ["AC-13", "AC-14", "AC-15"],
+      "dod": "Animated background reflects condition and day/night from location astronomy; header shows local time; prefers-reduced-motion swaps to static gradient; outage shows calm retry not blank",
+      "files_hint": ["components/weather/background/"]
+    },
+    {
+      "id": "T18",
+      "title": "Compose main page with responsive three-column layout and panel placement",
+      "layer": "wiring",
+      "deps": ["T10", "T11", "T12", "T13", "T14", "T15", "T16", "T17"],
+      "acs": ["AC-12", "AC-16"],
+      "dod": "app/page.tsx places search, forecast, map, compare per SAD §1 breakpoints; npm run build succeeds; manual smoke confirms no auth gate on any MVP flow",
+      "files_hint": ["app/page.tsx", "components/weather/"]
+    }
+  ]
+}

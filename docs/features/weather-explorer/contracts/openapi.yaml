@@ -1,0 +1,542 @@
+openapi: 3.1.0
+
+info:
+  title: Weather Explorer BFF API
+  version: 0.1.0
+  description: |
+    Server-side BFF for Weather Explorer — a keyless, privacy-first, Ukrainian-first
+    weekend trip weather planner. Proxies Open-Meteo geocoding and forecast data,
+    computes comfort scores and weekend highlights, and exposes no authentication surface.
+    Consumed by the Next.js web frontend; map tiles load directly from OpenStreetMap in the browser.
+
+servers:
+  - url: https://{host}
+    description: Vercel deployment (production or preview)
+    variables:
+      host:
+        default: weather-explorer.example.com
+  - url: http://localhost:3000
+    description: Local Next.js dev server
+
+# Anonymous product — no bearer tokens. Every operation is public.
+security: []
+
+paths:
+  /api/v1/geocode/suggestions:
+    get:
+      summary: Search city suggestions for debounced autocomplete
+      description: Maps to US-01. Returns matching places for a free-form query.
+      operationId: listGeocodeSuggestions
+      tags: [Geocode]
+      parameters:
+        - $ref: "#/components/parameters/Query"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Zero or more matching suggestions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeocodeSuggestionList"
+              examples:
+                matches:
+                  summary: Two Ukrainian cities
+                  value:
+                    items:
+                      - name: "Lviv"
+                        admin_region: "Lviv Oblast"
+                        country: "Ukraine"
+                        flag_emoji: "🇺🇦"
+                        latitude: 49.8397
+                        longitude: 24.0297
+                      - name: "Lviv"
+                        admin_region: "Lviv Oblast"
+                        country: "United States"
+                        flag_emoji: "🇺🇸"
+                        latitude: 40.3573
+                        longitude: -79.4478
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          description: Geocoding provider temporarily unavailable (AC-02b)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: geocode.provider_unavailable
+                message: "Geocoding is temporarily unavailable. Try again."
+        "502":
+          $ref: "#/components/responses/BadGateway"
+
+  /api/v1/geocode/reverse:
+    get:
+      summary: Resolve coordinates to a named place
+      description: Maps to US-03 map click and US-06 opt-in geolocation follow-up.
+      operationId: reverseGeocode
+      tags: [Geocode]
+      parameters:
+        - $ref: "#/components/parameters/Latitude"
+        - $ref: "#/components/parameters/Longitude"
+      responses:
+        "200":
+          description: Reverse geocode succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActiveLocation"
+              example:
+                name: "Odesa"
+                admin_region: "Odesa Oblast"
+                country: "Ukraine"
+                flag_emoji: "🇺🇦"
+                latitude: 46.4825
+                longitude: 30.7233
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          description: Reverse geocode failed or returned no usable place name (AC-06b)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: geocode.reverse_failed
+                message: "Could not resolve a place name for this point."
+        "503":
+          description: Geocoding provider temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: geocode.provider_unavailable
+                message: "Geocoding is temporarily unavailable. Try again."
+
+  /api/v1/forecast:
+    get:
+      summary: Fetch seven-day forecast with comfort scores for an active location
+      description: Maps to US-02, US-04 shareable link restore, and post-search load flows.
+      operationId: getForecast
+      tags: [Forecast]
+      parameters:
+        - $ref: "#/components/parameters/Latitude"
+        - $ref: "#/components/parameters/Longitude"
+        - in: query
+          name: name
+          description: Display name echoed from URL share state
+          schema:
+            type: string
+            maxLength: 120
+        - in: query
+          name: timezone
+          description: IANA timezone for weekend highlight calculation (defaults from coordinates)
+          schema:
+            type: string
+            maxLength: 64
+      responses:
+        "200":
+          description: Forecast loaded with comfort scores and weekend highlight
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForecastBundle"
+              example:
+                location:
+                  name: "Kyiv"
+                  admin_region: "Kyiv City"
+                  country: "Ukraine"
+                  flag_emoji: "🇺🇦"
+                  latitude: 50.4501
+                  longitude: 30.5234
+                weekend_highlight:
+                  score: 72
+                  rationale: "Помірна температура, невеликий вітер."
+                  saturday_date: "2026-07-11"
+                  sunday_date: "2026-07-12"
+                days:
+                  - date: "2026-07-04"
+                    weekday: "Friday"
+                    temperature_max_c: 26
+                    temperature_min_c: 17
+                    precipitation_probability_percent: 20
+                    wind_speed_ms: 4.2
+                    weather_icon: "partly_cloudy"
+                    comfort:
+                      value: 68
+                      rationale: "Тепло, без дощу."
+                      color: yellow
+                hourly:
+                  - time: "2026-07-04T14:00:00+03:00"
+                    temperature_c: 25
+                astronomy:
+                  sunrise: "2026-07-04T05:12:00+03:00"
+                  sunset: "2026-07-04T21:04:00+03:00"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "503":
+          description: Forecast provider temporarily unavailable (AC-14)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: forecast.provider_unavailable
+                message: "Forecast is temporarily unavailable. Try again."
+
+  /api/v1/forecast/weekend-compare:
+    post:
+      summary: Compare upcoming weekend metrics for two or three pinned cities
+      description: Maps to US-05 weekend compare table (AC-09).
+      operationId: compareWeekendForecast
+      tags: [Forecast]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeekendCompareRequest"
+            example:
+              locations:
+                - name: "Lviv"
+                  latitude: 49.8397
+                  longitude: 24.0297
+                - name: "Odesa"
+                  latitude: 46.4825
+                  longitude: 30.7233
+      responses:
+        "200":
+          description: Side-by-side Saturday and Sunday metrics per city
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeekendCompareResponse"
+        "400":
+          description: Invalid request — fewer than two locations (AC-09b) or more than three (AC-10)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                too_few:
+                  value:
+                    code: compare.too_few_locations
+                    message: "At least two pinned cities are required for compare."
+                too_many:
+                  value:
+                    code: compare.too_many_locations
+                    message: "At most three cities can be compared."
+        "503":
+          description: Forecast provider temporarily unavailable for one or more cities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                code: forecast.provider_unavailable
+                message: "Forecast is temporarily unavailable. Try again."
+
+components:
+  parameters:
+    Query:
+      in: query
+      name: q
+      required: true
+      description: Free-form city search text
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 120
+    Limit:
+      in: query
+      name: limit
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 10
+        default: 5
+    Latitude:
+      in: query
+      name: lat
+      required: true
+      schema:
+        type: number
+        format: double
+        minimum: -90
+        maximum: 90
+    Longitude:
+      in: query
+      name: lon
+      required: true
+      schema:
+        type: number
+        format: double
+        minimum: -180
+        maximum: 180
+
+  responses:
+    BadRequest:
+      description: Malformed or missing parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: request.invalid_parameters
+            message: "Required parameters are missing or invalid."
+    BadGateway:
+      description: Upstream provider error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: upstream.bad_gateway
+            message: "Upstream weather service returned an error."
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          pattern: "^[a-z_]+\\.[a-z_]+$"
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    ActiveLocation:
+      type: object
+      required: [name, latitude, longitude]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          maxLength: 120
+        admin_region:
+          type: [string, "null"]
+          maxLength: 120
+        country:
+          type: [string, "null"]
+          maxLength: 120
+        flag_emoji:
+          type: [string, "null"]
+          maxLength: 8
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+
+    GeocodeSuggestion:
+      allOf:
+        - $ref: "#/components/schemas/ActiveLocation"
+
+    GeocodeSuggestionList:
+      type: object
+      required: [items]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeocodeSuggestion"
+        empty:
+          type: boolean
+          description: True when zero matches — UI shows inline Nothing found (AC-02)
+
+    ComfortScore:
+      type: object
+      required: [value, rationale, color]
+      additionalProperties: false
+      properties:
+        value:
+          type: integer
+          minimum: 0
+          maximum: 100
+        rationale:
+          type: string
+          maxLength: 80
+          description: One Ukrainian sentence, no emojis (AC-18)
+        color:
+          type: string
+          enum: [green, yellow, red]
+          description: green ≥70, yellow 40–69, red <40 (AC-18)
+
+    DailyForecastDay:
+      type: object
+      required:
+        - date
+        - weekday
+        - temperature_max_c
+        - temperature_min_c
+        - precipitation_probability_percent
+        - wind_speed_ms
+        - weather_icon
+        - comfort
+      additionalProperties: false
+      properties:
+        date:
+          type: string
+          format: date
+        weekday:
+          type: string
+          maxLength: 16
+        temperature_max_c:
+          type: number
+          format: double
+        temperature_min_c:
+          type: number
+          format: double
+        precipitation_probability_percent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        wind_speed_ms:
+          type: number
+          format: double
+          minimum: 0
+        weather_icon:
+          type: string
+          maxLength: 32
+        comfort:
+          $ref: "#/components/schemas/ComfortScore"
+
+    HourlyTemperaturePoint:
+      type: object
+      required: [time, temperature_c]
+      additionalProperties: false
+      properties:
+        time:
+          type: string
+          description: Open-Meteo local ISO datetime for the active location (AC-04)
+        temperature_c:
+          type: number
+          format: double
+
+    WeekendHighlight:
+      type: object
+      required: [score, rationale, saturday_date, sunday_date]
+      additionalProperties: false
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Mean of Saturday and Sunday comfort scores (AC-05)
+        rationale:
+          type: string
+          maxLength: 80
+        saturday_date:
+          type: string
+          format: date
+        sunday_date:
+          type: string
+          format: date
+
+    AstronomyToday:
+      type: object
+      required: [sunrise, sunset]
+      additionalProperties: false
+      properties:
+        sunrise:
+          type: string
+          description: Today's sunrise in active location local ISO time (AC-04)
+        sunset:
+          type: string
+          description: Today's sunset in active location local ISO time (AC-04)
+
+    ForecastBundle:
+      type: object
+      required: [location, timezone, weekend_highlight, days, hourly, astronomy]
+      additionalProperties: false
+      properties:
+        location:
+          $ref: "#/components/schemas/ActiveLocation"
+        timezone:
+          type: string
+          description: IANA timezone of the active location (AC-05, AC-13)
+        weekend_highlight:
+          $ref: "#/components/schemas/WeekendHighlight"
+        days:
+          type: array
+          minItems: 7
+          maxItems: 7
+          items:
+            $ref: "#/components/schemas/DailyForecastDay"
+        hourly:
+          type: array
+          minItems: 1
+          maxItems: 48
+          description: Forty-eight hours from active location current local hour (AC-04)
+          items:
+            $ref: "#/components/schemas/HourlyTemperaturePoint"
+        astronomy:
+          $ref: "#/components/schemas/AstronomyToday"
+
+    WeekendCompareRequest:
+      type: object
+      required: [locations]
+      additionalProperties: false
+      properties:
+        locations:
+          type: array
+          minItems: 2
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ActiveLocation"
+
+    WeekendDayMetrics:
+      type: object
+      required:
+        - temperature_max_c
+        - temperature_min_c
+        - precipitation_probability_percent
+        - comfort
+      additionalProperties: false
+      properties:
+        temperature_max_c:
+          type: number
+          format: double
+        temperature_min_c:
+          type: number
+          format: double
+        precipitation_probability_percent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        comfort:
+          $ref: "#/components/schemas/ComfortScore"
+
+    WeekendCompareCityColumn:
+      type: object
+      required: [location, saturday, sunday]
+      additionalProperties: false
+      properties:
+        location:
+          $ref: "#/components/schemas/ActiveLocation"
+        saturday:
+          $ref: "#/components/schemas/WeekendDayMetrics"
+        sunday:
+          $ref: "#/components/schemas/WeekendDayMetrics"
+
+    WeekendCompareResponse:
+      type: object
+      required: [columns]
+      additionalProperties: false
+      properties:
+        columns:
+          type: array
+          minItems: 2
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/WeekendCompareCityColumn"

@@ -1,0 +1,51 @@
+{
+  "slug": "_scaffold",
+  "feature_size": "M",
+  "tasks": [
+    {
+      "id": "S1",
+      "title": "Bootstrap Next.js App Router project skeleton",
+      "layer": "scaffold",
+      "deps": [],
+      "acs": [],
+      "dod": "npm run build succeeds; app/ layout and empty page render",
+      "files_hint": ["app/", "package.json", "tsconfig.json", "next.config.ts", "postcss.config.mjs"]
+    },
+    {
+      "id": "S2",
+      "title": "Add Tailwind 4, shadcn/ui base, and globals.css tokens",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "Tailwind utilities apply; components/ui shell importable",
+      "files_hint": ["app/globals.css", "components/ui/", "lib/utils.ts"]
+    },
+    {
+      "id": "S3",
+      "title": "Wire Vitest and framework-free lib/ smoke test",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "npm test runs green with lib/smoke.test.ts passing",
+      "files_hint": ["vitest.config.ts", "lib/smoke.test.ts"]
+    },
+    {
+      "id": "S4",
+      "title": "Add CI workflow for lint, typecheck, test, and build",
+      "layer": "scaffold",
+      "deps": ["S2", "S3"],
+      "acs": [],
+      "dod": "GitHub Actions workflow runs npm run lint && tsc --noEmit && npm test && npm run build",
+      "files_hint": [".github/workflows/ci.yml"]
+    },
+    {
+      "id": "S5",
+      "title": "Write CLAUDE.md from architecture-map conventions",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "CLAUDE.md documents stack, folders, lib purity rule, and SDD doc paths",
+      "files_hint": ["CLAUDE.md"]
+    }
+  ]
+}
