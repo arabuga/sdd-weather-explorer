@@ -35,4 +35,4 @@ shipped_weather_explorer: "2026-07-04"
 
 | Date | Outcome | Feature | PR |
 |---|---|---|---|
-| 2026-07-04 | Anonymous visitors can decide whether and where a weekend trip is weather-worth-it — calmly, in Ukrainian, without accounts or tracking | [weather-explorer](./features/weather-explorer/) ([changelog](./features/weather-explorer/CHANGELOG.md)) | [arabuga/sdd-weather-explorer](https://github.com/arabuga/sdd-weather-explorer) |
+| 2026-07-04 | Anonymous visitors can decide whether and where a weekend trip is weather-worth-it — calmly, in Ukrainian, without accounts or tracking | [weather-explorer](./features/weather-explorer/) ([changelog](./features/weather-explorer/CHANGELOG.md)) | [repo](https://github.com/arabuga/sdd-weather-explorer) · [demo](https://sdd-weather-explorer.vercel.app) |

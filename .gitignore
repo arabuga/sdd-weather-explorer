@@ -8,3 +8,6 @@ coverage/
 *.tsbuildinfo
 Day_1.pdf
 agentic_greenfield_lesson_start_slides_04_45.md
+
+.vercel
+.env*
